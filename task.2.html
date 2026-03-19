@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApexPlanet - Advanced Task Manager</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .main-wrapper {
+            width: 90%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            padding: 20px;
+        }
+
+        /* Glassmorphism Card Style */
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover { transform: translateY(-5px); }
+
+        h3 { margin-top: 0; color: var(--primary); font-size: 1.5rem; }
+
+        /* Input Styles */
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus { border-color: var(--primary); }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: opacity 0.3s;
+        }
+
+        .btn:hover { opacity: 0.9; }
+
+        /* Modern To-Do Items */
+        .todo-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f1f5f9;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .delete-btn {
+            color: #ef4444;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #msg { font-size: 0.9rem; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    <div class="card">
+        <h3>📩 Get in Touch</h3>
+        <form id="myForm">
+            <input type="text" id="name" placeholder="Your Name" required>
+            <input type="email" id="email" placeholder="Email Address" required>
+            <button type="submit" class="btn">Send Message</button>
+        </form>
+        <p id="msg"></p>
+    </div>
+
+    <div class="card">
+        <h3>📝 Task Planner</h3>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="todoInput" placeholder="What needs to be done?">
+            <button onclick="addTask()" class="btn" style="width: 60px;">+</button>
+        </div>
+        <div id="todoList"></div>
+    </div>
+</div>
+
+<script>
+    // --- 1. Form Logic with Feedback ---
+    document.getElementById('myForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const msg = document.getElementById('msg');
+        // Simple success animation
+        msg.style.color = "#059669";
+        msg.innerText = "✓ Message sent to ApexPlanet!";
+        this.reset();
+        setTimeout(() => msg.innerText = "", 3000);
+    });
+
+    // --- 2. Advanced To-Do Logic (with LocalStorage) ---
+    const todoList = document.getElementById('todoList');
+    const todoInput = document.getElementById('todoInput');
+
+    // Load data from LocalStorage
+    document.addEventListener('DOMContentLoaded', getTodos);
+
+    function addTask() {
+        if(todoInput.value.trim() === "") return;
+
+        createTodoElement(todoInput.value);
+        saveLocalTodos(todoInput.value);
+        
+        todoInput.value = "";
+    }
+
+    function createTodoElement(text) {
+        const div = document.createElement('div');
+        div.className = 'todo-item';
+        div.innerHTML = `
+            <span>${text}</span> 
+            <span class="delete-btn" onclick="removeTask(this, '${text}')">✕</span>
+        `;
+        todoList.appendChild(div);
+    }
+
+    function removeTask(element, text) {
+        element.parentElement.remove();
+        removeLocalTodos(text);
+    }
+
+    // --- Local Storage Functions ---
+    function saveLocalTodos(todo) {
+        let todos = localStorage.getItem('todos') ? JSON.parse(localStorage.getItem('todos')) : [];
+        todos.push(todo);
+        localStorage.setItem('todos', JSON.stringify(todos));
+    }
+
+    function getTodos() {
+        let todos = localStorage.getItem('todos') ? JSON.parse(localStorage.getItem('todos')) : [];
+        todos.forEach(todo => createTodoElement(todo));
+    }
+
+    function removeLocalTodos(todo) {
+        let todos = JSON.parse(localStorage.getItem('todos'));
+        const index = todos.indexOf(todo);
+        todos.splice(index, 1);
+        localStorage.setItem('todos', JSON.stringify(todos));
+    }
+</script>
+
+</body>
+</html>
